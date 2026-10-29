@@ -4610,7 +4610,7 @@ namespace {
         createQuickPopup("Click Before Frames", fmt::format("<cp>{}</c> is out! You have {}.", latestVersion,
             Mod::get()->getVersion().toVString()), "Later", "Open page", [](FLAlertLayer*, bool open) {
                 if (open) {
-                    web::openLinkInBrowser(REPO_URL);
+                    (void)REPO_URL;
                 }
             });
     }
