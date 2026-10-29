@@ -4594,83 +4594,11 @@ namespace {
         }
     }
 
-    // v2.81 update check: once per game start, reads the version in the public repo's mod.json
-    // (in the background) and says so on the main menu if a newer one is out.
-    constexpr char const* REPO_URL = "https://github.com/raresdalas1009/-predictive-input-buffer";
-    std::string latestVersion;
-    bool updateChecked = false;
-    bool updateShown = false;
-
-    void showUpdatePopup() {
-        if (updateShown || latestVersion.empty() || !CCScene::get()) {
-            return;
-        }
-        updateShown = true;
-        say("update: {} is out (you have {})", latestVersion, Mod::get()->getVersion().toVString());
-        createQuickPopup("Click Before Frames", fmt::format("<cp>{}</c> is out! You have {}.", latestVersion,
-            Mod::get()->getVersion().toVString()), "Later", "Open page", [](FLAlertLayer*, bool open) {
-                if (open) {
-                    web::openLinkInBrowser(REPO_URL);
-                }
-            });
-    }
-
-    void checkForUpdate() {
-        if (updateChecked || !Mod::get()->getSettingValue<bool>("check-updates")) {
-            return;
-        }
-        updateChecked = true;
-        std::thread([] {
-            auto res = web::WebRequest()
-                .timeout(std::chrono::seconds(10))
-                .getSync("https://raw.githubusercontent.com/raresdalas1009/-predictive-input-buffer/main/mod.json");
-            if (!res.ok()) {
-                return;
-            }
-            auto text = res.string();
-            if (!text) {
-                return;
-            }
-            auto json = matjson::parse(*text);
-            if (!json) {
-                return;
-            }
-            auto version = (*json)["version"].asString();
-            if (!version) {
-                return;
-            }
-            auto latest = VersionInfo::parse(*version);
-            if (!latest || !(*latest > Mod::get()->getVersion())) {
-                return;
-            }
-            std::string name = latest->toVString();
-            queueInMainThread([name] {
-                latestVersion = name;
-                auto* scene = CCScene::get();
-                if (scene && scene->getChildByType<MenuLayer>(0)) {
-                    showUpdatePopup();
-                }
-            });
-        }).detach();
-    }
 }
 
 $on_mod(Loaded) {
     setupKeybinds();
 }
-
-class $modify(BufMenuLayer, MenuLayer) {
-    bool init() {
-        if (!MenuLayer::init()) {
-            return false;
-        }
-        checkForUpdate();
-        if (!latestVersion.empty() && !updateShown) {
-            queueInMainThread([] { showUpdatePopup(); });
-        }
-        return true;
-    }
-};
 
 // v2.79 custom TPS (from the v2.80 build): above 240 the level is stepped in 1/tps pieces.
 // update() runs once per step and getModifiedDelta() hands the step through unrounded, so
