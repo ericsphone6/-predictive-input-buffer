@@ -32,6 +32,14 @@ jobs:
           sdk: stable
           combine: true
           target: ${{ matrix.config.target }}
+      - name: Show compile errors
+        if: failure()
+        shell: bash
+        run: |
+          ls -d */ || true
+          for d in build*/ ; do
+            cmake --build "$d" 2>&1 | grep -E "error|undefined" | head -25 | sed 's/^/::error::/' || true
+          done
   package:
     name: Package builds
     runs-on: ubuntu-latest
