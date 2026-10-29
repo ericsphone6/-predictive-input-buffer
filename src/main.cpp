@@ -4655,9 +4655,6 @@ namespace {
     }
 }
 
-$on_mod(Loaded) {
-    setupKeybinds();
-}
 
 class $modify(BufMenuLayer, MenuLayer) {
     bool init() {
