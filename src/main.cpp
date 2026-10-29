@@ -4610,7 +4610,7 @@ namespace {
         createQuickPopup("Click Before Frames", fmt::format("<cp>{}</c> is out! You have {}.", latestVersion,
             Mod::get()->getVersion().toVString()), "Later", "Open page", [](FLAlertLayer*, bool open) {
                 if (open) {
-                    web::openLinkInBrowser(REPO_URL);
+                    web::openLinkInBrowser(std::string(REPO_URL));
                 }
             });
     }
@@ -4621,33 +4621,27 @@ namespace {
         }
         updateChecked = true;
         std::thread([] {
-            auto res = web::WebRequest()
-                .timeout(std::chrono::seconds(10))
-                .getSync("https://raw.githubusercontent.com/raresdalas1009/-predictive-input-buffer/main/mod.json");
+            auto res = web::WebRequest().getSync("https://raw.githubusercontent.com/raresdalas1009/-predictive-input-buffer/main/mod.json");
             if (!res.ok()) {
                 return;
             }
-            auto text = res.string();
-            if (!text) {
+            auto json = res.json();
+            if (json.isErr()) {
                 return;
             }
-            auto json = matjson::parse(*text);
-            if (!json) {
+            auto version = json.unwrap()["version"].asString();
+            if (version.isErr()) {
                 return;
             }
-            auto version = (*json)["version"].asString();
-            if (!version) {
+            auto latest = VersionInfo::parse(version.unwrap());
+            if (latest.isErr() || !(latest.unwrap() > Mod::get()->getVersion())) {
                 return;
             }
-            auto latest = VersionInfo::parse(*version);
-            if (!latest || !(*latest > Mod::get()->getVersion())) {
-                return;
-            }
-            std::string name = latest->toVString();
+            std::string name = latest.unwrap().toVString();
             queueInMainThread([name] {
                 latestVersion = name;
                 auto* scene = CCScene::get();
-                if (scene && scene->getChildByType<MenuLayer>(0)) {
+                if (scene && scene->getChildByID("MenuLayer")) {
                     showUpdatePopup();
                 }
             });
