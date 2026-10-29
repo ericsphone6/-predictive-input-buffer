@@ -4620,38 +4620,7 @@ namespace {
             return;
         }
         updateChecked = true;
-        std::thread([] {
-            auto res = web::WebRequest()
-                .timeout(std::chrono::seconds(10))
-                .getSync("https://raw.githubusercontent.com/raresdalas1009/-predictive-input-buffer/main/mod.json");
-            if (!res.ok()) {
-                return;
-            }
-            auto text = res.string();
-            if (!text) {
-                return;
-            }
-            auto json = matjson::parse(*text);
-            if (!json) {
-                return;
-            }
-            auto version = (*json)["version"].asString();
-            if (!version) {
-                return;
-            }
-            auto latest = VersionInfo::parse(*version);
-            if (!latest || !(*latest > Mod::get()->getVersion())) {
-                return;
-            }
-            std::string name = latest->toVString();
-            queueInMainThread([name] {
-                latestVersion = name;
-                auto* scene = CCScene::get();
-                if (scene && scene->getChildByType<MenuLayer>(0)) {
-                    showUpdatePopup();
-                }
-            });
-        }).detach();
+
     }
 }
 
