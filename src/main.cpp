@@ -4647,7 +4647,7 @@ namespace {
             queueInMainThread([name] {
                 latestVersion = name;
                 auto* scene = CCScene::get();
-                if (scene && scene->getChildByType<MenuLayer>(0)) {
+                if (scene && scene->getChildByID("MenuLayer")) {
                     showUpdatePopup();
                 }
             });
