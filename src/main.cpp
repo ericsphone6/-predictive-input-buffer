@@ -543,20 +543,11 @@ namespace {
         }
     }
 
-    // v2.14: a run outside practice where auto-release can press for you is marked on screen.
-    // v2.46 watermark: whenever the buffer is on (any stage but OFF) the level shows it, and
-    // can't be turned off, so runs made with the mod are recognisable.
+    // Watermark removed: intentionally do nothing.
     void refreshWatermark() {
-        if (!buf.watermark) {
-            return;
+        if (buf.watermark) {
+            buf.watermark->setVisible(false);
         }
-        // v2.57: hidden in practice mode (practice runs can't be submitted, and it crowded the
-        // checkpoint buttons); always shown in normal mode while the buffer is on.
-        auto* layer = GameManager::get()->m_playLayer;
-        buf.watermark->setVisible(buf.enabled && !(layer && layer->m_isPracticeMode));
-        // v2.79: a custom TPS is always shown
-        auto tpsText = buf.tps != 240 ? fmt::format("  |  {} TPS", buf.tps) : std::string();
-        buf.watermark->setString(fmt::format("Click Before Frames  |  {}{}", stageText(), tpsText).c_str());
     }
 
     void refreshAutoTag() {
@@ -4204,14 +4195,8 @@ class $modify(BufPlayLayer, PlayLayer) {
         this->addChild(buf.panel);
         refreshPanel();
 
-        buf.watermark = CCLabelBMFont::create("", "bigFont.fnt");
-        buf.watermark->setScale(0.28f);
-        buf.watermark->setColor({ 150, 205, 255 });
-        buf.watermark->setOpacity(153);
-        buf.watermark->setAnchorPoint({ 0.f, 0.f });
-        buf.watermark->setPosition({ 6.f, 4.f });
-        buf.watermark->setZOrder(1000);
-        this->addChild(buf.watermark);
+        // Watermark label creation removed.
+        buf.watermark = nullptr;
         buf.usedThisAttempt = false;
         refreshWatermark();
 
