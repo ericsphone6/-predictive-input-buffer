@@ -3949,13 +3949,6 @@ class $modify(BufEndLevelLayer, EndLevelLayer) {
             return;
         }
         auto win = CCDirector::get()->getWinSize();
-        auto* label = CCLabelBMFont::create("Click Before Frames was on", "bigFont.fnt");
-        label->setScale(0.35f);
-        label->setColor({ 150, 205, 255 });
-        label->setOpacity(170);
-        label->setAnchorPoint({ 1.f, 1.f });
-        label->setPosition({ win.width - 6.f, win.height - 4.f });
-        this->addChild(label, 100);
         if (attemptStats.saves > 0) {
             auto* stats = CCLabelBMFont::create(attemptSummary().c_str(), "bigFont.fnt");
             stats->setScale(0.28f);
@@ -3968,24 +3961,6 @@ class $modify(BufEndLevelLayer, EndLevelLayer) {
         benchFinish();  // a completed run is the best recording there is
         benchFlush();
         endAttempt();
-    }
-};
-
-class $modify(BufPauseLayer, PauseLayer) {
-    void customSetup() {
-        PauseLayer::customSetup();
-        auto* sprite = ButtonSprite::create("Buffer", "bigFont.fnt", BufferMenu::currentTheme().button, 0.8f);
-        sprite->setScale(0.6f);
-        auto* button = CCMenuItemSpriteExtra::create(sprite, this, menu_selector(BufPauseLayer::onBufferMenu));
-        auto* menu = CCMenu::create();
-        menu->addChild(button);
-        auto win = CCDirector::get()->getWinSize();
-        menu->setPosition({ win.width - 50.f, 30.f });
-        this->addChild(menu, 10);
-    }
-
-    void onBufferMenu(CCObject*) {
-        BufferMenu::open();
     }
 };
 
